@@ -1,0 +1,27 @@
+{
+  "name": "numbat-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Numbat local-first request inspector — capture middleware, in-memory store, REST API, and WebSocket feed.",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "node dist/smoke.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.1",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.23.1",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

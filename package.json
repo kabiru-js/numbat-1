@@ -1,0 +1,37 @@
+{
+  "name": "figma-make-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "oxfmt",
+    "server:dev": "cd server && pnpm dev",
+    "server:start": "cd server && pnpm start",
+    "server:build": "cd server && pnpm build",
+    "server:typecheck": "cd server && pnpm typecheck",
+    "server:smoke": "cd server && pnpm smoke",
+    "cli:build": "cd cli && pnpm build",
+    "cli:start": "cd cli && node dist/bin/numbat.js",
+    "cli:doctor": "cd cli && node dist/bin/numbat.js doctor",
+    "sdk:build": "cd sdk && pnpm build",
+    "sdk:smoke": "cd sdk && pnpm smoke"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "oxfmt": "^0.2.0",
+    "typescript": "^5.7.0",
+    "vite": "^8.0.0"
+  }
+}

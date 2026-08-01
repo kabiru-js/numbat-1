@@ -1,0 +1,21 @@
+{
+  "name": "numbat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local-first HTTP inspector — capture, inspect, and replay API traffic. Starts the Numbat server + dashboard with one command.",
+  "bin": {
+    "numbat": "dist/bin/numbat.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/bin/numbat.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}

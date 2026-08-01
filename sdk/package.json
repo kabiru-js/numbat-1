@@ -1,0 +1,23 @@
+{
+  "name": "@numbat/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One-line Numbat integration for Express apps — capture, inspect, and replay API traffic from the local Numbat dashboard.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "smoke": "node dist/smoke.js"
+  },
+  "peerDependencies": {
+    "express": ">=4.18"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.1",
+    "express": "^5.2.1",
+    "typescript": "^5.9.3"
+  }
+}

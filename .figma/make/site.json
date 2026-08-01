@@ -1,0 +1,10 @@
+{
+  "description": "Monitor API requests, errors, and runtime behavior locally in real time with a clean, precise interface designed for developers seeking full observability.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

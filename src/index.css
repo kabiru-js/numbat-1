@@ -1,0 +1,151 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import 'tailwindcss';
+
+:root {
+  --bg: #0A0C10;
+  --bg2: #0D1117;
+  --surface: #161B22;
+  --surface2: #21262D;
+  --surface3: #2D333B;
+  --border: #21262D;
+  --border2: #30363D;
+  --text: #E6EDF3;
+  --text-muted: #8B949E;
+  --text-subtle: #484F58;
+  --blue: #3B82F6;
+  --blue-light: #58A6FF;
+  --blue-hover: #1D6FEB;
+  --blue-dim: rgba(59,130,246,0.12);
+  --blue-glow: rgba(59,130,246,0.15);
+  --green: #3FB950;
+  --green-dim: rgba(63,185,80,0.12);
+  --amber: #D29922;
+  --amber-dim: rgba(210,153,34,0.12);
+  --red: #F85149;
+  --red-dim: rgba(248,81,73,0.12);
+  --purple: #8B5CF6;
+
+  /* Light section variables */
+  --light-bg: #ffffff;
+  --light-surface: #F6F8FA;
+  --light-border: #D0D7DE;
+  --light-text: #1F2328;
+  --light-muted: #57606A;
+  --light-subtle: #6E7781;
+
+  --radius: 6px;
+  --radius-lg: 12px;
+  --shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100vh; }
+
+.mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
+::selection { background: rgba(56,139,253,0.25); color: var(--text); }
+
+/* Marquee */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.marquee-inner {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+.marquee-wrap:hover .marquee-inner {
+  animation-play-state: paused;
+}
+
+/* Skeleton */
+@keyframes shimmer {
+  0% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
+.skeleton {
+  animation: shimmer 1.5s ease-in-out infinite;
+  background: var(--surface2);
+  border-radius: 4px;
+}
+
+/* Fade in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.22s ease-out forwards; }
+
+/* Spin */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 0.75s linear infinite; }
+
+/* Pulse dot */
+@keyframes pulse-out {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Blink cursor */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.cursor { animation: blink 1s step-end infinite; }
+
+/* Row slide in */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in { animation: slideIn 0.18s ease-out forwards; }
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #E6EDF3 0%, #8B949E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Light section gradient text */
+.gradient-text-dark {
+  background: linear-gradient(135deg, #1F2328 0%, #57606A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Hero grid background */
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Dot grid */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(59,130,246,0.18) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
