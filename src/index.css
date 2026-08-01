@@ -236,3 +236,75 @@ html, body {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
 }
+
+/* ─── Responsive (mobile-first breakpoints) ────────────────────────────────── */
+
+/* Dashboard shell */
+.dash-root { height: 100dvh !important; }
+
+/* Mobile-only header bar (hidden on desktop) */
+.mobile-nav { display: none; }
+
+/* Sidebar hidden on mobile (replaced by .mobile-nav tabs) */
+.sidebar {}
+
+/* Horizontally scrollable tables instead of squishing */
+.table-scroll { overflow-x: auto; }
+.table-grid { min-width: 560px; }
+
+/* Search inputs */
+.topbar-search-wrap {}
+.topbar-search { width: 220px; }
+.sub-toolbar {}
+.sub-toolbar-search {}
+.toolbar-search { width: 260px; }
+
+/* Connection pill text (dot stays) */
+.conn-text {}
+
+/* Error summary cards */
+.stat-grid {}
+
+/* Marketing nav links + hero CTA */
+.mkt-nav-links {}
+.mkt-cta {}
+
+/* Restore the fade-in utility the components reference */
+.fade-in { animation: fadeUp 0.22s ease-out forwards; }
+
+@media (max-width: 768px) {
+  /* Dashboard: swap sidebar for a compact header + tabs */
+  .mobile-nav { display: flex; }
+  .sidebar { display: none !important; }
+
+  /* Request detail becomes a full-screen overlay */
+  .request-detail {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    border-left: none !important;
+    z-index: 60 !important;
+  }
+
+  /* Error summary cards stack */
+  .stat-grid { grid-template-columns: 1fr !important; }
+
+  /* Marketing: hide nav links, stack hero CTA */
+  .mkt-nav-links { display: none !important; }
+  .mkt-cta { flex-direction: column !important; align-items: stretch !important; }
+  .mkt-cta input { max-width: 100% !important; }
+  .mkt-cta button { width: 100% !important; }
+}
+
+@media (max-width: 640px) {
+  /* Topbar: search expands, connection text hides */
+  .topbar-search-wrap { flex: 1 !important; min-width: 0 !important; }
+  .topbar-search { width: 100% !important; }
+  .conn-text { display: none !important; }
+
+  /* Requests toolbar: wrap, full-width search */
+  .sub-toolbar { flex-wrap: wrap !important; }
+  .sub-toolbar-search { display: none !important; }
+  .toolbar-search { width: 100% !important; }
+}

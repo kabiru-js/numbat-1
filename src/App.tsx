@@ -277,7 +277,7 @@ function MarketingPage({ onNav, theme, onToggleTheme }: { onNav: (v: View) => vo
             </div>
             <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: '-0.3px' }}>NUMBAT</span>
           </div>
-          <div style={{ display: 'flex', gap: 24 }}>
+          <div className="mkt-nav-links" style={{ display: 'flex', gap: 24 }}>
             {[
               { label: 'Features', href: '#features' },
               { label: 'How it works', href: '#how' },
@@ -341,7 +341,7 @@ function MarketingPage({ onNav, theme, onToggleTheme }: { onNav: (v: View) => vo
               Numbat captures every API request, runtime error, and performance event from your localhost. No cloud setup. No config files. No agent required.
             </p>
 
-            <form onSubmit={(e) => { e.preventDefault(); onNav('dashboard') }} style={{ display: 'flex', gap: 8, marginBottom: 16, maxWidth: 560 }}>
+            <form className="mkt-cta" onSubmit={(e) => { e.preventDefault(); onNav('dashboard') }} style={{ display: 'flex', gap: 8, marginBottom: 16, maxWidth: 560 }}>
               <input
                 type="email"
                 placeholder="you@company.dev"
@@ -390,8 +390,8 @@ function MarketingPage({ onNav, theme, onToggleTheme }: { onNav: (v: View) => vo
               </span>
             </div>
             {/* Fake table */}
-            <div>
-              <div style={{
+            <div className="table-scroll">
+              <div className="table-grid" style={{
                 display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
                 padding: '8px 16px', borderBottom: '1px solid var(--border-default)',
               }}>
@@ -406,7 +406,7 @@ function MarketingPage({ onNav, theme, onToggleTheme }: { onNav: (v: View) => vo
                 { id: '4', method: 'DELETE' as const, endpoint: '/api/projects/proj_x8k2m', status: 403, duration: 12, timestamp: '34s ago' },
                 { id: '5', method: 'GET' as const, endpoint: '/api/billing/subscription', status: 500, duration: 891, timestamp: '1m ago' },
               ].map((r, i) => (
-                <div key={r.id} style={{
+                <div key={r.id} className="table-grid" style={{
                   display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
                   padding: '10px 16px', borderBottom: '1px solid var(--border-muted)',
                   alignItems: 'center', background: i === 2 ? 'var(--canvas-inset)' : 'transparent',
@@ -852,7 +852,7 @@ function Sidebar({ dashView, setDashView, onNav, errorCount, connected }: {
   ]
 
   return (
-    <div style={{
+    <div className="sidebar" style={{
       width: 216, flexShrink: 0, borderRight: '1px solid var(--border)',
       display: 'flex', flexDirection: 'column', height: '100vh',
       background: 'var(--surface)', position: 'sticky', top: 0,
@@ -919,6 +919,56 @@ function Sidebar({ dashView, setDashView, onNav, errorCount, connected }: {
   )
 }
 
+/** Compact header shown only on mobile (the sidebar is hidden there). */
+function MobileNav({ dashView, setDashView, connected, theme, onToggleTheme }: {
+  dashView: DashView
+  setDashView: (v: DashView) => void
+  connected: boolean | null
+  theme: Theme
+  onToggleTheme: () => void
+}) {
+  const tabs: Array<{ id: DashView; label: string; icon: React.ReactNode }> = [
+    { id: 'requests', label: 'Requests', icon: <IconActivity /> },
+    { id: 'errors', label: 'Errors', icon: <IconAlertTriangle /> },
+    { id: 'empty', label: 'Setup', icon: <IconTerminal /> },
+  ]
+  return (
+    <div className="mobile-nav" style={{
+      flexDirection: 'column', flexShrink: 0,
+      borderBottom: '1px solid var(--border)', background: 'var(--surface)',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px' }}>
+        <div style={{ width: 22, height: 22, borderRadius: 6, background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>N</span>
+        </div>
+        <span style={{ fontWeight: 600, fontSize: 13 }}>NUMBAT</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : connected === null ? 'var(--text-subtle)' : 'var(--red)' }}/>
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 4, padding: '0 12px 10px' }}>
+        {tabs.map(t => {
+          const active = dashView === t.id
+          return (
+            <button key={t.id} onClick={() => setDashView(t.id)} style={{
+              flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '8px 0', borderRadius: 6, border: 'none', cursor: 'pointer',
+              fontSize: 12, fontWeight: 500,
+              background: active ? 'var(--surface3)' : 'transparent',
+              color: active ? 'var(--text)' : 'var(--text-muted)',
+              transition: 'all .12s',
+            }}>
+              {t.icon}
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function Topbar({ dashView, search, setSearch, connected, theme, onToggleTheme }: {
   dashView: DashView
   search: string
@@ -940,16 +990,17 @@ function Topbar({ dashView, search, setSearch, connected, theme, onToggleTheme }
     }}>
       <h1 style={{ fontSize: 14, fontWeight: 600, margin: 0, flex: 1 }}>{titles[dashView]}</h1>
       {dashView === 'requests' && (
-        <div style={{ position: 'relative' }}>
+        <div className="topbar-search-wrap" style={{ position: 'relative' }}>
           <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)', pointerEvents: 'none' }}>
             <IconSearch />
           </span>
           <input
+            className="topbar-search"
             placeholder="Filter by endpoint..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
-              padding: '6px 10px 6px 30px', width: 220,
+              padding: '6px 10px 6px 30px',
               background: 'var(--surface2)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 13,
               outline: 'none', fontFamily: 'Inter, system-ui, sans-serif',
@@ -966,7 +1017,7 @@ function Topbar({ dashView, search, setSearch, connected, theme, onToggleTheme }
         border: '1px solid var(--border)',
       }}>
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : connected === null ? 'var(--text-subtle)' : 'var(--amber)', flexShrink: 0 }}/>
-        <span style={{ fontSize: 12, color: connected ? 'var(--text-muted)' : 'var(--amber)' }}>{connected ? 'Connected to localhost' : connected === null ? 'Connecting…' : 'Disconnected'}</span>
+        <span className="conn-text" style={{ fontSize: 12, color: connected ? 'var(--text-muted)' : 'var(--amber)' }}>{connected ? 'Connected to localhost' : connected === null ? 'Connecting…' : 'Disconnected'}</span>
       </div>
       <ThemeToggle theme={theme} onToggle={onToggleTheme} />
     </div>
@@ -1047,7 +1098,7 @@ function RequestDetail({ summary, detail, loading, onClose }: { summary: Request
   }
 
   return (
-    <div className="fade-in" style={{
+    <div className="request-detail fade-in" style={{
       width: 400, flexShrink: 0, borderLeft: '1px solid var(--border)',
       display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--surface)',
     }}>
@@ -1320,20 +1371,21 @@ function RequestsView({ search, setSearch }: { search: string; setSearch: (s: st
     <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Sub-toolbar */}
-        <div style={{
+        <div className="sub-toolbar" style={{
           padding: '8px 24px', borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
         }}>
-          <div style={{ position: 'relative' }}>
+          <div className="sub-toolbar-search" style={{ position: 'relative' }}>
             <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-subtle)', pointerEvents: 'none' }}>
               <IconSearch />
             </span>
             <input
+              className="toolbar-search"
               placeholder="Filter by endpoint..."
               value={search}
               onChange={e => setSearch(e.target.value)}
               style={{
-                padding: '6px 10px 6px 30px', width: 260,
+                padding: '6px 10px 6px 30px',
                 background: 'var(--surface2)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius)', color: 'var(--text)', fontSize: 13,
                 outline: 'none', fontFamily: 'Inter, system-ui, sans-serif',
@@ -1362,9 +1414,9 @@ function RequestsView({ search, setSearch }: { search: string; setSearch: (s: st
         </div>
 
         {/* Table */}
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div className="table-scroll" style={{ flex: 1, overflow: 'auto' }}>
           {/* Header */}
-          <div style={{
+          <div className="table-grid" style={{
             display: 'grid', gridTemplateColumns: '80px 1fr 72px 88px 104px',
             padding: '8px 24px', borderBottom: '1px solid var(--border)',
             position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 10,
@@ -1379,7 +1431,7 @@ function RequestsView({ search, setSearch }: { search: string; setSearch: (s: st
 
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} style={{
+              <div key={i} className="table-grid" style={{
                 display: 'grid', gridTemplateColumns: '80px 1fr 72px 88px 104px',
                 padding: '12px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center', gap: 8,
               }}>
@@ -1398,7 +1450,7 @@ function RequestsView({ search, setSearch }: { search: string; setSearch: (s: st
             filtered.map(r => {
               const isSelected = selectedId === r.id
               return (
-                <div key={r.id} onClick={() => setSelectedId(isSelected ? null : r.id)} style={{
+                <div key={r.id} className="table-grid" onClick={() => setSelectedId(isSelected ? null : r.id)} style={{
                   display: 'grid', gridTemplateColumns: '80px 1fr 72px 88px 104px',
                   padding: '11px 24px', borderBottom: '1px solid var(--border)', alignItems: 'center',
                   cursor: 'pointer', transition: 'background .1s',
@@ -1491,7 +1543,7 @@ function ErrorsView({ onCountChange }: { onCountChange: (n: number) => void }) {
   return (
     <div style={{ flex: 1, overflow: 'auto', padding: '24px' }}>
       {/* Summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+      <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
         {loading ? (
           [0, 1, 2].map(i => (
             <div key={i} style={{
@@ -1715,13 +1767,16 @@ function Dashboard({ onNav, theme, onToggleTheme }: { onNav: (v: View) => void; 
   }, [dashView])
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
-      <Sidebar dashView={dashView} setDashView={setDashView} onNav={onNav} errorCount={errorCount} connected={connected} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Topbar dashView={dashView} search={search} setSearch={setSearch} connected={connected} theme={theme} onToggleTheme={onToggleTheme} />
-        {dashView === 'requests' && <RequestsView search={search} setSearch={setSearch} />}
-        {dashView === 'errors' && <ErrorsView onCountChange={setErrorCount} />}
-        {dashView === 'empty' && <EmptyState />}
+    <div className="dash-root" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', background: 'var(--bg)' }}>
+      <MobileNav dashView={dashView} setDashView={setDashView} connected={connected} theme={theme} onToggleTheme={onToggleTheme} />
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        <Sidebar dashView={dashView} setDashView={setDashView} onNav={onNav} errorCount={errorCount} connected={connected} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Topbar dashView={dashView} search={search} setSearch={setSearch} connected={connected} theme={theme} onToggleTheme={onToggleTheme} />
+          {dashView === 'requests' && <RequestsView search={search} setSearch={setSearch} />}
+          {dashView === 'errors' && <ErrorsView onCountChange={setErrorCount} />}
+          {dashView === 'empty' && <EmptyState />}
+        </div>
       </div>
     </div>
   )
