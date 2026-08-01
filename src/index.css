@@ -1,83 +1,163 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import 'tailwindcss';
 
-:root {
-  --bg: #0A0C10;
-  --bg2: #0D1117;
-  --surface: #161B22;
-  --surface2: #21262D;
-  --surface3: #2D333B;
-  --border: #21262D;
-  --border2: #30363D;
-  --text: #E6EDF3;
-  --text-muted: #8B949E;
-  --text-subtle: #484F58;
-  --blue: #3B82F6;
-  --blue-light: #58A6FF;
-  --blue-hover: #1D6FEB;
-  --blue-dim: rgba(59,130,246,0.12);
-  --blue-glow: rgba(59,130,246,0.15);
-  --green: #3FB950;
-  --green-dim: rgba(63,185,80,0.12);
-  --amber: #D29922;
-  --amber-dim: rgba(210,153,34,0.12);
-  --red: #F85149;
-  --red-dim: rgba(248,81,73,0.12);
-  --purple: #8B5CF6;
+/* ─── Design tokens (GitHub/Primer-inspired, semantic, light + dark) ──────────
+ * Dark is the default; the app sets `data-theme="light"` on <html> to switch.
+ * Legacy aliases (--bg, --surface, --text, …) map onto the semantic tokens so
+ * existing components re-theme automatically.
+ */
 
-  /* Light section variables */
-  --light-bg: #ffffff;
-  --light-surface: #F6F8FA;
-  --light-border: #D0D7DE;
-  --light-text: #1F2328;
-  --light-muted: #57606A;
-  --light-subtle: #6E7781;
+:root {
+  color-scheme: dark;
+
+  /* Semantic tokens — dark */
+  --canvas-default: #0d1117;
+  --canvas-subtle: #161b22;
+  --canvas-overlay: #1c2128;
+  --canvas-inset: #010409;
+  --border-default: #30363d;
+  --border-muted: #21262d;
+  --fg-default: #e6edf3;
+  --fg-muted: #8b949e;
+  --fg-subtle: #6e7781;
+  --fg-on-accent: #ffffff;
+  --accent-emphasis: #2f81f7;
+  --accent-hover: #1f6feb;
+  --accent-muted: rgba(47, 129, 247, 0.12);
+  --accent-glow: rgba(47, 129, 247, 0.15);
+  --success-fg: #3fb950;
+  --success-muted: rgba(63, 185, 80, 0.12);
+  --danger-fg: #f85149;
+  --danger-muted: rgba(248, 81, 73, 0.12);
+  --attention-fg: #d29922;
+  --attention-muted: rgba(210, 153, 34, 0.12);
+  --purple-fg: #bc8cff;
+  --header-bg: rgba(13, 17, 23, 0.85);
+  --shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+
+  /* Legacy aliases — dark */
+  --bg: var(--canvas-default);
+  --surface: var(--canvas-subtle);
+  --surface2: var(--canvas-overlay);
+  --surface3: #262c36;
+  --border: var(--border-muted);
+  --border2: var(--border-default);
+  --text: var(--fg-default);
+  --text-muted: var(--fg-muted);
+  --text-subtle: var(--fg-subtle);
+  --blue: var(--accent-emphasis);
+  --blue-light: #58a6ff;
+  --blue-hover: var(--accent-hover);
+  --blue-dim: var(--accent-muted);
+  --blue-glow: var(--accent-glow);
+  --green: var(--success-fg);
+  --green-dim: var(--success-muted);
+  --amber: var(--attention-fg);
+  --amber-dim: var(--attention-muted);
+  --red: var(--danger-fg);
+  --red-dim: var(--danger-muted);
+  --purple: var(--purple-fg);
 
   --radius: 6px;
   --radius-lg: 12px;
-  --shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.4);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
 }
+
+/* Light theme */
+[data-theme='light'] {
+  color-scheme: light;
+
+  --canvas-default: #ffffff;
+  --canvas-subtle: #f6f8fa;
+  --canvas-overlay: #ffffff;
+  --canvas-inset: #ffffff;
+  --border-default: #d0d7de;
+  --border-muted: #d8dee4;
+  --fg-default: #1f2328;
+  --fg-muted: #57606a;
+  --fg-subtle: #6e7781;
+  --fg-on-accent: #ffffff;
+  --accent-emphasis: #0969da;
+  --accent-hover: #0860ca;
+  --accent-muted: rgba(9, 105, 218, 0.1);
+  --accent-glow: rgba(9, 105, 218, 0.12);
+  --success-fg: #1a7f37;
+  --success-muted: rgba(26, 127, 55, 0.12);
+  --danger-fg: #cf222e;
+  --danger-muted: rgba(207, 34, 46, 0.1);
+  --attention-fg: #9a6700;
+  --attention-muted: rgba(154, 103, 0, 0.12);
+  --purple-fg: #8250df;
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --shadow: 0 1px 3px rgba(31, 35, 40, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  --shadow-sm: 0 1px 2px rgba(31, 35, 40, 0.08);
+
+  --bg: var(--canvas-default);
+  --surface: var(--canvas-subtle);
+  --surface2: var(--canvas-overlay);
+  --surface3: #eaeef2;
+  --border: var(--border-muted);
+  --border2: var(--border-default);
+  --text: var(--fg-default);
+  --text-muted: var(--fg-muted);
+  --text-subtle: var(--fg-subtle);
+  --blue: var(--accent-emphasis);
+  --blue-light: #58a6ff;
+  --blue-hover: var(--accent-hover);
+  --blue-dim: var(--accent-muted);
+  --blue-glow: var(--accent-glow);
+  --green: var(--success-fg);
+  --green-dim: var(--success-muted);
+  --amber: var(--attention-fg);
+  --amber-dim: var(--attention-muted);
+  --red: var(--danger-fg);
+  --red-dim: var(--danger-muted);
+  --purple: var(--purple-fg);
+}
+
+/* ─── Typography — system-first, no webfonts ───────────────────────────────── */
 
 * { box-sizing: border-box; }
 
 html, body {
-  margin: 0; padding: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: var(--canvas-default);
+  color: var(--fg-default);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root { min-height: 100vh; }
 
-.mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+.mono {
+  font-family: ui-monospace, 'SFMono-Regular', 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+}
 
-/* Scrollbars */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* ─── Scrollbars ────────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-subtle); }
-::selection { background: rgba(56,139,253,0.25); color: var(--text); }
+::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
+::selection { background: var(--accent-muted); color: var(--fg-default); }
 
-/* Marquee */
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.marquee-inner {
-  display: flex;
-  width: max-content;
-  animation: marquee 28s linear infinite;
-}
-.marquee-wrap:hover .marquee-inner {
-  animation-play-state: paused;
-}
+/* ─── Motion (subtle, functional) ──────────────────────────────────────────── */
 
-/* Skeleton */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.22s ease-out forwards; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in { animation: slideIn 0.18s ease-out forwards; }
+
 @keyframes shimmer {
   0% { opacity: 0.4; }
   50% { opacity: 0.7; }
@@ -89,63 +169,70 @@ html, body {
   border-radius: 4px;
 }
 
-/* Fade in */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-up { animation: fadeUp 0.22s ease-out forwards; }
-
-/* Spin */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spin { animation: spin 0.75s linear infinite; }
 
-/* Pulse dot */
-@keyframes pulse-out {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(2.4); opacity: 0; }
-}
-
-/* Blink cursor */
 @keyframes blink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
 .cursor { animation: blink 1s step-end infinite; }
 
-/* Row slide in */
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(-6px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-.slide-in { animation: slideIn 0.18s ease-out forwards; }
+/* ─── Shared component recipes ─────────────────────────────────────────────── */
 
-/* Gradient text */
+.btn-primary {
+  background: var(--accent-emphasis);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--fg-on-accent);
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary {
+  background: var(--canvas-default);
+  border: 1px solid var(--border-default);
+  color: var(--fg-muted);
+  padding: 8px 18px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-secondary:hover { border-color: var(--fg-subtle); color: var(--fg-default); }
+
+/* Hairline card */
+.card {
+  background: var(--canvas-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+}
+
+/* Gradient headline accent for the marketing hero only */
 .gradient-text {
-  background: linear-gradient(135deg, #E6EDF3 0%, #8B949E 100%);
+  background: linear-gradient(135deg, #e6edf3 0%, #8b949e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+[data-theme='light'] .gradient-text {
+  background: linear-gradient(135deg, #1f2328 0%, #57606a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Light section gradient text */
-.gradient-text-dark {
-  background: linear-gradient(135deg, #1F2328 0%, #57606A 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Hero grid background */
+/* Hero grid background (very subtle) */
 .hero-grid {
   background-image:
-    linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+    linear-gradient(var(--accent-glow) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent-glow) 1px, transparent 1px);
   background-size: 48px 48px;
-}
-
-/* Dot grid */
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(59,130,246,0.18) 1px, transparent 1px);
-  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
 }

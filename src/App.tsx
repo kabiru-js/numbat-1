@@ -92,6 +92,23 @@ function IconChevronDown() {
   )
 }
 
+function IconSun() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.5 1.5M11.5 11.5L13 13M13 3l-1.5 1.5M4.5 11.5L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
+function IconMoon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M13.5 9.5A6 6 0 1 1 6.5 2.5a4.5 4.5 0 0 0 7 7Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
 function IconCopy() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -191,379 +208,453 @@ function MethodTag({ method }: { method: string }) {
   )
 }
 
+// ─── Theme ────────────────────────────────────────────────────────────────────
+
+type Theme = 'light' | 'dark'
+
+/**
+ * Theme state: manual toggle wins, falls back to the OS preference, persists
+ * to localStorage, and syncs to <html data-theme>. Dark is the CSS default.
+ */
+function useTheme(): [Theme, () => void] {
+  const [theme, setTheme] = useState<Theme>(() => {
+    try {
+      const saved = localStorage.getItem('numbat.theme')
+      if (saved === 'light' || saved === 'dark') return saved
+      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+    } catch {
+      return 'dark'
+    }
+  })
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try { localStorage.setItem('numbat.theme', theme) } catch { /* ignore */ }
+  }, [theme])
+
+  return [theme, () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))]
+}
+
+function ThemeToggle({ theme, onToggle }: { theme: Theme; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: 32, height: 32, background: 'transparent',
+        border: '1px solid var(--border2)', borderRadius: 'var(--radius)',
+        color: 'var(--text-muted)', cursor: 'pointer', transition: 'all .15s', flexShrink: 0,
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}
+      onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+    >
+      {theme === 'dark' ? <IconSun /> : <IconMoon />}
+    </button>
+  )
+}
+
 // ─── Marketing Page ───────────────────────────────────────────────────────────
 
-function MarketingPage({ onNav }: { onNav: (v: View) => void }) {
+function MarketingPage({ onNav, theme, onToggleTheme }: { onNav: (v: View) => void; theme: Theme; onToggleTheme: () => void }) {
+  const scrollTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault()
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+  }
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      {/* Nav */}
+    <div style={{ background: 'var(--canvas-default)', color: 'var(--fg-default)', minHeight: '100vh' }}>
+      {/* Sticky nav */}
       <nav style={{
-        borderBottom: '1px solid var(--border)',
-        padding: '0 40px',
-        height: 56,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(11,11,12,0.92)', backdropFilter: 'blur(12px)',
+        background: 'var(--header-bg)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--border-default)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', height: 60, display: 'flex', alignItems: 'center', gap: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 24, height: 24, borderRadius: 6,
-              background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--accent-emphasis)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', letterSpacing: '-0.5px' }}>N</span>
             </div>
             <span style={{ fontWeight: 600, fontSize: 15, letterSpacing: '-0.3px' }}>NUMBAT</span>
           </div>
-          <div style={{ display: 'flex', gap: 32 }}>
-            {['Docs', 'Changelog', 'GitHub'].map(l => (
-              <a key={l} href={l === 'GitHub' ? 'https://github.com' : '#'} style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: 14, transition: 'color .15s' }}
-                onClick={e => { if (l !== 'GitHub') e.preventDefault() }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-                {l}
+          <div style={{ display: 'flex', gap: 24 }}>
+            {[
+              { label: 'Features', href: '#features' },
+              { label: 'How it works', href: '#how' },
+              { label: 'Product', href: '#product' },
+              { label: 'GitHub', href: 'https://github.com' },
+            ].map(l => (
+              <a key={l.label} href={l.href} onClick={l.href.startsWith('#') ? scrollTo(l.href.slice(1)) : undefined} style={{ color: 'var(--fg-muted)', textDecoration: 'none', fontSize: 14, transition: 'color .15s' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg-default)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-muted)')}>
+                {l.label}
               </a>
             ))}
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => onNav('login')} style={{
-            background: 'transparent', border: '1px solid var(--border2)',
-            color: 'var(--text-muted)', padding: '6px 16px', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all .15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--text-subtle)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border2)' }}>
-            Sign in
-          </button>
-          <button onClick={() => onNav('dashboard')} style={{
-            background: 'var(--blue)', border: 'none',
-            color: '#fff', padding: '6px 16px', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background .15s',
-          }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--blue-hover)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--blue)')}>
-            Get Started
-          </button>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+            <button onClick={() => onNav('login')} style={{
+              background: 'transparent', border: '1px solid var(--border-default)',
+              color: 'var(--fg-muted)', padding: '5px 14px', borderRadius: 'var(--radius)',
+              cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all .15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--fg-default)'; e.currentTarget.style.borderColor = 'var(--fg-subtle)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--fg-muted)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}>
+              Sign in
+            </button>
+            <button onClick={() => onNav('dashboard')} style={{
+              background: 'var(--accent-emphasis)', border: '1px solid rgba(255,255,255,0.08)',
+              color: '#fff', padding: '5px 14px', borderRadius: 'var(--radius)',
+              cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'background .15s',
+            }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--accent-emphasis)')}>
+              Get Started
+            </button>
+          </div>
         </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ maxWidth: 860, margin: '0 auto', padding: '96px 40px 80px' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '4px 12px', borderRadius: 24, fontSize: 12, fontWeight: 500,
-          border: '1px solid var(--border2)', color: 'var(--text-muted)',
-          marginBottom: 32,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', display: 'inline-block' }}/>
-          v1.0 — Now in public beta
-        </div>
+      <section style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="hero-grid" style={{ position: 'absolute', inset: 0 }} />
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '88px 24px 72px', position: 'relative' }}>
+          <div style={{ maxWidth: 720 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '4px 12px', borderRadius: 24, fontSize: 12, fontWeight: 500,
+              border: '1px solid var(--border-default)', color: 'var(--fg-muted)',
+              marginBottom: 24, background: 'var(--canvas-subtle)',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success-fg)', display: 'inline-block' }}/>
+              v1.0 — Now in public beta
+            </div>
 
-        <h1 style={{
-          fontSize: 56, fontWeight: 700, lineHeight: 1.1, letterSpacing: '-1.5px',
-          margin: '0 0 24px',
-          color: 'var(--text)',
-        }}>
-          See everything your app<br />is doing — in real time.
-        </h1>
+            <h1 style={{
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 700, lineHeight: 1.1,
+              letterSpacing: '-0.03em', margin: '0 0 20px',
+            }}>
+              See everything your app<br />is doing — <span className="gradient-text">in real time.</span>
+            </h1>
 
-        <p style={{
-          fontSize: 18, lineHeight: 1.65, color: 'var(--text-muted)',
-          maxWidth: 560, margin: '0 0 40px',
-        }}>
-          NUMBAT captures every API request, runtime error, and performance event from your localhost. No cloud setup. No config files. No agent required.
-        </p>
+            <p style={{ fontSize: 18, lineHeight: 1.6, color: 'var(--fg-muted)', maxWidth: 560, margin: '0 0 32px' }}>
+              Numbat captures every API request, runtime error, and performance event from your localhost. No cloud setup. No config files. No agent required.
+            </p>
 
-        <div style={{ display: 'flex', gap: 12, marginBottom: 64 }}>
-          <button onClick={() => onNav('dashboard')} style={{
-            background: 'var(--blue)', border: 'none',
-            color: '#fff', padding: '10px 24px', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: 14, fontWeight: 600, transition: 'background .15s',
-          }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--blue-hover)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'var(--blue)')}>
-            Get Started — it's free
-          </button>
-          <button onClick={() => onNav('dashboard')} style={{
-            background: 'transparent', border: '1px solid var(--border2)',
-            color: 'var(--text-muted)', padding: '10px 24px', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: 14, fontWeight: 500, transition: 'all .15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--text-subtle)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border2)' }}>
-            View Demo →
-          </button>
-        </div>
-
-        {/* Terminal block */}
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)', overflow: 'hidden',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
-        }}>
-          <div style={{
-            padding: '10px 16px', borderBottom: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }}/>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }}/>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28CA41' }}/>
-            <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--text-subtle)' }}>Terminal</span>
+            <form onSubmit={(e) => { e.preventDefault(); onNav('dashboard') }} style={{ display: 'flex', gap: 8, marginBottom: 16, maxWidth: 560 }}>
+              <input
+                type="email"
+                placeholder="you@company.dev"
+                aria-label="Work email"
+                style={{
+                  flex: 1, padding: '10px 14px', minWidth: 0,
+                  background: 'var(--canvas-default)', border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius)', color: 'var(--fg-default)', fontSize: 14,
+                  outline: 'none', fontFamily: 'inherit', transition: 'border-color .15s',
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'var(--accent-emphasis)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+              />
+              <button type="submit" style={{
+                background: 'var(--accent-emphasis)', border: '1px solid rgba(255,255,255,0.08)',
+                color: '#fff', padding: '10px 22px', borderRadius: 'var(--radius)',
+                cursor: 'pointer', fontSize: 14, fontWeight: 500, transition: 'background .15s', flexShrink: 0,
+              }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'var(--accent-emphasis)')}>
+                Get Started
+              </button>
+            </form>
+            <p style={{ fontSize: 13, color: 'var(--fg-subtle)', margin: 0 }}>
+              Runs entirely on your machine. Nothing leaves localhost.
+            </p>
           </div>
-          <div className="mono" style={{ padding: '20px 24px', fontSize: 13, lineHeight: 1.8 }}>
-            <div><span style={{ color: 'var(--text-subtle)' }}>$</span> <span style={{ color: 'var(--text)' }}>npm install -g numbat</span></div>
-            <div style={{ color: 'var(--text-subtle)', marginTop: 4 }}>+ numbat@1.0.3 installed globally</div>
-            <div style={{ marginTop: 8 }}><span style={{ color: 'var(--text-subtle)' }}>$</span> <span style={{ color: 'var(--text)' }}>numbat start</span></div>
-            <div style={{ color: 'var(--green)', marginTop: 4 }}>✓ Listening on localhost:9000</div>
-            <div style={{ color: 'var(--green)' }}>✓ Dashboard at <span style={{ textDecoration: 'underline', cursor: 'pointer' }}>http://localhost:3000</span></div>
-            <div style={{ color: 'var(--text-subtle)', marginTop: 8 }}>Watching for requests...</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              <span style={{ color: 'var(--blue)' }}>GET</span>
-              <span style={{ color: 'var(--text)' }}>/api/users/me</span>
-              <span style={{ color: 'var(--green)' }}>200</span>
-              <span style={{ color: 'var(--text-subtle)' }}>42ms</span>
+
+          {/* Product visual — dashboard mock in browser chrome */}
+          <div style={{ marginTop: 64, boxShadow: 'var(--shadow)', borderRadius: 8, border: '1px solid var(--border-default)', overflow: 'hidden', background: 'var(--canvas-subtle)' }}>
+            <div style={{
+              padding: '10px 16px', borderBottom: '1px solid var(--border-default)',
+              display: 'flex', alignItems: 'center', gap: 8, background: 'var(--canvas-overlay)',
+            }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }}/>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }}/>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28CA41' }}/>
+              <div style={{ marginLeft: 8, flex: 1, maxWidth: 420 }}>
+                <div style={{ background: 'var(--canvas-inset)', borderRadius: 4, padding: '2px 10px', fontSize: 11, color: 'var(--fg-subtle)', fontFamily: 'ui-monospace, SFMono-Regular, Consolas, Menlo, monospace' }}>
+                  localhost:9000/dashboard
+                </div>
+              </div>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--fg-muted)', background: 'var(--canvas-inset)', borderRadius: 4, padding: '2px 8px' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--success-fg)' }}/>
+                Connected
+              </span>
+            </div>
+            {/* Fake table */}
+            <div>
+              <div style={{
+                display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
+                padding: '8px 16px', borderBottom: '1px solid var(--border-default)',
+              }}>
+                {['Method', 'Endpoint', 'Status', 'Duration', 'Timestamp'].map(h => (
+                  <span key={h} style={{ fontSize: 11, color: 'var(--fg-subtle)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
+                ))}
+              </div>
+              {[
+                { id: '1', method: 'GET' as const, endpoint: '/api/users/me', status: 200, duration: 42, timestamp: '2s ago' },
+                { id: '2', method: 'POST' as const, endpoint: '/api/auth/refresh', status: 200, duration: 89, timestamp: '8s ago' },
+                { id: '3', method: 'GET' as const, endpoint: '/api/projects?page=1…', status: 200, duration: 156, timestamp: '15s ago' },
+                { id: '4', method: 'DELETE' as const, endpoint: '/api/projects/proj_x8k2m', status: 403, duration: 12, timestamp: '34s ago' },
+                { id: '5', method: 'GET' as const, endpoint: '/api/billing/subscription', status: 500, duration: 891, timestamp: '1m ago' },
+              ].map((r, i) => (
+                <div key={r.id} style={{
+                  display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
+                  padding: '10px 16px', borderBottom: '1px solid var(--border-muted)',
+                  alignItems: 'center', background: i === 2 ? 'var(--canvas-inset)' : 'transparent',
+                }}>
+                  <MethodTag method={r.method} />
+                  <span className="mono" style={{ fontSize: 12, color: 'var(--fg-default)', paddingRight: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.endpoint}</span>
+                  <Badge status={r.status} />
+                  <span className="mono" style={{ fontSize: 12, color: durationColor(r.duration) }}>{r.duration}ms</span>
+                  <span style={{ fontSize: 12, color: 'var(--fg-subtle)' }}>{r.timestamp}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats strip */}
-      <div style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 40px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-            {[
-              { label: 'p95 capture latency', value: '<50ms' },
-              { label: 'Requests per second', value: '10,000+' },
-              { label: 'Supported runtimes', value: 'Node, Deno, Bun' },
-              { label: 'Setup time', value: '< 30 seconds' },
-            ].map((s, i) => (
-              <div key={i} style={{
-                padding: '32px 0',
-                borderRight: i < 3 ? '1px solid var(--border)' : 'none',
-                paddingRight: i < 3 ? 40 : 0,
-                paddingLeft: i > 0 ? 40 : 0,
-              }}>
-                <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--text)' }}>{s.value}</div>
-                <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Features */}
-      <section style={{ maxWidth: 860, margin: '0 auto', padding: '80px 40px' }}>
-        <div style={{ marginBottom: 48 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--blue)', textTransform: 'uppercase', marginBottom: 12 }}>Features</div>
-          <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.5px', margin: 0, color: 'var(--text)' }}>
-            Built for the debug loop,<br />not the boardroom.
-          </h2>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
-          {[
-            {
-              icon: <IconActivity />,
-              title: 'Request Inspector',
-              desc: 'Capture every HTTP request with full headers, body, and timing. Click any row to replay it against your live server.',
-            },
-            {
-              icon: <IconAlertTriangle />,
-              title: 'Error Tracking',
-              desc: 'Stack traces, error chains, and affected endpoints — grouped automatically. No Sentry account required.',
-            },
-            {
-              icon: <IconZap />,
-              title: 'Real-time Stream',
-              desc: 'Events appear in under 50ms. No polling, no page refresh, no batching delay.',
-            },
-            {
-              icon: <IconShield />,
-              title: 'Stays on Localhost',
-              desc: 'Nothing leaves your machine. No telemetry, no cloud sync, no vendor lock-in. Your traffic is yours.',
-            },
-          ].map((f, i) => (
-            <div key={i} style={{
-              padding: '32px', background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: i === 0 ? '8px 0 0 0' : i === 1 ? '0 8px 0 0' : i === 2 ? '0 0 0 8px' : '0 0 8px 0',
-              transition: 'background .15s',
-            }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface)')}>
-              <div style={{ color: 'var(--blue)', marginBottom: 16 }}>{f.icon}</div>
-              <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px', color: 'var(--text)' }}>{f.title}</h3>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0, lineHeight: 1.65 }}>{f.desc}</p>
-            </div>
+      {/* Logo strip — monochrome, muted */}
+      <section style={{ borderTop: '1px solid var(--border-muted)', borderBottom: '1px solid var(--border-muted)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 32, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 12, color: 'var(--fg-subtle)', marginRight: 'auto' }}>Built by teams that ship on localhost</span>
+          {['Acme', 'Northwind', 'Globex', 'Initech', 'Umbrella', 'Stark'].map(l => (
+            <span key={l} style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg-subtle)', letterSpacing: '0.02em' }}>{l}</span>
           ))}
         </div>
       </section>
 
-      {/* How it works */}
-      <section style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '80px 40px' }}>
-          <div style={{ marginBottom: 48 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--blue)', textTransform: 'uppercase', marginBottom: 12 }}>How it works</div>
-            <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.5px', margin: 0 }}>Three commands to full visibility.</h2>
+      {/* Features */}
+      <section id="features" style={{ borderBottom: '1px solid var(--border-muted)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 24px' }}>
+          <div style={{ marginBottom: 48, maxWidth: 560 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--accent-emphasis)', textTransform: 'uppercase', marginBottom: 12 }}>Features</div>
+            <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>
+              Built for the debug loop,<br />not the boardroom.
+            </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {[
+              {
+                icon: <IconActivity />,
+                title: 'Request Inspector',
+                desc: 'Capture every HTTP request with full headers, body, and timing. Click any row to replay it against your live server.',
+              },
+              {
+                icon: <IconAlertTriangle />,
+                title: 'Error Tracking',
+                desc: 'Stack traces, error chains, and affected endpoints — grouped automatically. No Sentry account required.',
+              },
+              {
+                icon: <IconZap />,
+                title: 'Real-time Stream',
+                desc: 'Events appear the moment they happen. No polling, no page refresh, no batching delay.',
+              },
+              {
+                icon: <IconShield />,
+                title: 'Stays on Localhost',
+                desc: 'Nothing leaves your machine. No telemetry, no cloud sync, no vendor lock-in. Your traffic is yours.',
+              },
+              {
+                icon: <IconCopy />,
+                title: 'One-line cURL',
+                desc: 'Export any captured request as a readable curl command. Redacted headers are skipped automatically.',
+              },
+              {
+                icon: <IconPlay />,
+                title: 'Editable Replay',
+                desc: 'Re-fire requests with tweaked methods, headers, or bodies — and watch the result land in the log.',
+              },
+            ].map((f, i) => (
+              <div key={i} style={{
+                padding: 24, background: 'var(--canvas-subtle)',
+                border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
+                transition: 'border-color .15s',
+              }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--fg-subtle)')}
+                onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border-default)')}>
+                <div style={{ color: 'var(--accent-emphasis)', marginBottom: 14 }}>{f.icon}</div>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px' }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--fg-muted)', margin: 0, lineHeight: 1.6 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" style={{ background: 'var(--canvas-subtle)', borderBottom: '1px solid var(--border-muted)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 24px' }}>
+          <div style={{ marginBottom: 48, maxWidth: 560 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--accent-emphasis)', textTransform: 'uppercase', marginBottom: 12 }}>How it works</div>
+            <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>Three commands to full visibility.</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
             {[
               { step: '01', title: 'Install the CLI', body: 'Run', code: 'npm install -g numbat', post: 'in any shell. Node 18+ required.' },
               { step: '02', title: 'Start the agent', body: 'Run', code: 'numbat start', post: 'from your project root. NUMBAT binds to localhost:9000 automatically.' },
               { step: '03', title: 'Open the dashboard', body: 'Navigate to', code: 'localhost:3000', post: 'and watch requests arrive as they happen.' },
             ].map((s, i) => (
-              <div key={i} style={{ position: 'relative' }}>
-                <div className="mono" style={{ fontSize: 11, color: 'var(--text-subtle)', marginBottom: 16, letterSpacing: '0.05em' }}>{s.step}</div>
-                <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 12px' }}>{s.title}</h3>
-                <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: '0 0 12px', lineHeight: 1.65 }}>
-                  {s.body} <code className="mono" style={{
-                    background: 'var(--surface3)', color: 'var(--blue)',
+              <div key={i} style={{
+                padding: 24, background: 'var(--canvas-default)',
+                border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
+              }}>
+                <div className="mono" style={{ fontSize: 11, color: 'var(--fg-subtle)', marginBottom: 14, letterSpacing: '0.05em' }}>{s.step}</div>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: '0 0 8px' }}>{s.title}</h3>
+                <p style={{ fontSize: 14, color: 'var(--fg-muted)', margin: 0, lineHeight: 1.6 }}>
+                  {s.body}{' '}
+                  <code className="mono" style={{
+                    background: 'var(--canvas-inset)', color: 'var(--accent-emphasis)',
                     padding: '1px 6px', borderRadius: 4, fontSize: 12,
-                  }}>{s.code}</code> {s.post}
+                  }}>{s.code}</code>{' '}
+                  {s.post}
                 </p>
-                {i < 2 && (
-                  <div style={{
-                    position: 'absolute', right: -24, top: 48,
-                    color: 'var(--border2)',
-                  }}>
-                    <IconChevronRight />
-                  </div>
-                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Product preview */}
-      <section style={{ maxWidth: 860, margin: '0 auto', padding: '80px 40px' }}>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--blue)', textTransform: 'uppercase', marginBottom: 12 }}>Product</div>
-          <h2 style={{ fontSize: 32, fontWeight: 700, letterSpacing: '-0.5px', margin: 0 }}>The dashboard, without the noise.</h2>
-        </div>
-        <div style={{
-          border: '1px solid var(--border)', borderRadius: 'var(--radius)',
-          overflow: 'hidden', background: 'var(--surface)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.6)',
-        }}>
-          {/* Fake topbar */}
-          <div style={{
-            padding: '0 16px', height: 48, borderBottom: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', gap: 16,
-          }}>
-            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flex: 1 }}>
-              <div style={{ width: 24, height: 24, borderRadius: 6, background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>N</span>
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>NUMBAT</span>
+      {/* Product — alternating rows */}
+      <section id="product" style={{ borderBottom: '1px solid var(--border-muted)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 24px' }}>
+          <div style={{ marginBottom: 48, maxWidth: 560 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', color: 'var(--accent-emphasis)', textTransform: 'uppercase', marginBottom: 12 }}>Product</div>
+            <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 600, letterSpacing: '-0.02em', margin: 0 }}>The dashboard, without the noise.</h2>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24, alignItems: 'center' }}>
+            <div>
+              <h3 style={{ fontSize: 20, fontWeight: 600, margin: '0 0 12px' }}>Every detail, one click away.</h3>
+              <p style={{ fontSize: 15, color: 'var(--fg-muted)', margin: '0 0 24px', lineHeight: 1.6 }}>
+                Headers, request and response bodies, timings — plus copyable cURL and replay with edits. Inspect without leaving the loop.
+              </p>
+              <button onClick={() => onNav('dashboard')} style={{
+                background: 'transparent', border: '1px solid var(--border-default)',
+                color: 'var(--fg-muted)', padding: '8px 20px', borderRadius: 'var(--radius)',
+                cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all .15s',
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = 'var(--fg-default)'; e.currentTarget.style.borderColor = 'var(--fg-subtle)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = 'var(--fg-muted)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}>
+                Explore the demo dashboard →
+              </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', background: 'var(--surface2)', borderRadius: 6, border: '1px solid var(--border)' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }}/>
-              <span className="mono" style={{ fontSize: 11, color: 'var(--text-muted)' }}>localhost:3000</span>
+            <div style={{ boxShadow: 'var(--shadow)', borderRadius: 8, border: '1px solid var(--border-default)', overflow: 'hidden', background: 'var(--canvas-subtle)' }}>
+              <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', gap: 8, background: 'var(--canvas-overlay)' }}>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FF5F57' }}/>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#FFBD2E' }}/>
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#28CA41' }}/>
+                <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-subtle)' }}>Request /api/users/me</span>
+              </div>
+              <div style={{ padding: 16 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--fg-muted)', borderBottom: '2px solid var(--accent-emphasis)', paddingBottom: 6 }}>Overview</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--fg-subtle)', paddingBottom: 6 }}>Headers</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--fg-subtle)', paddingBottom: 6 }}>Body</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--fg-subtle)', paddingBottom: 6 }}>Response</span>
+                </div>
+                {[
+                  ['Method', 'GET'], ['Endpoint', '/api/users/me'], ['Status', '200'], ['Duration', '42ms'], ['Source', 'default'],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 10px', borderRadius: 6, background: 'var(--canvas-inset)', marginBottom: 2, fontSize: 12 }}>
+                    <span style={{ color: 'var(--fg-muted)' }}>{k}</span>
+                    <span className="mono" style={{ color: k === 'Status' ? 'var(--success-fg)' : 'var(--fg-default)' }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+                  <span style={{ flex: 1, textAlign: 'center', padding: '8px 0', fontSize: 12, fontWeight: 500, background: 'var(--accent-muted)', border: '1px solid var(--accent-glow)', borderRadius: 6, color: 'var(--accent-emphasis)' }}>Replay Request</span>
+                  <span style={{ flex: 1, textAlign: 'center', padding: '8px 0', fontSize: 12, fontWeight: 500, border: '1px solid var(--border-default)', borderRadius: 6, color: 'var(--fg-muted)' }}>Copy cURL</span>
+                </div>
+              </div>
             </div>
           </div>
-          {/* Fake table */}
-          <div>
-            <div style={{
-              display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
-              padding: '8px 16px', borderBottom: '1px solid var(--border)',
-            }}>
-              {['Method', 'Endpoint', 'Status', 'Duration', 'Timestamp'].map(h => (
-                <span key={h} style={{ fontSize: 11, color: 'var(--text-subtle)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</span>
-              ))}
-            </div>
-            {[
-              { id: '1', method: 'GET' as const, endpoint: '/api/users/me', status: 200, duration: 42, timestamp: '2s ago' },
-              { id: '2', method: 'POST' as const, endpoint: '/api/auth/refresh', status: 200, duration: 89, timestamp: '8s ago' },
-              { id: '3', method: 'GET' as const, endpoint: '/api/projects?page=1…', status: 200, duration: 156, timestamp: '15s ago' },
-              { id: '4', method: 'DELETE' as const, endpoint: '/api/projects/proj_x8k2m', status: 403, duration: 12, timestamp: '34s ago' },
-              { id: '5', method: 'GET' as const, endpoint: '/api/billing/subscription', status: 500, duration: 891, timestamp: '1m ago' },
-            ].map((r, i) => (
-              <div key={r.id} style={{
-                display: 'grid', gridTemplateColumns: '72px 1fr 64px 72px 100px',
-                padding: '10px 16px', borderBottom: '1px solid var(--border)',
-                alignItems: 'center',
-                background: i === 2 ? 'var(--surface2)' : 'transparent',
-              }}>
-                <MethodTag method={r.method} />
-                <span className="mono" style={{ fontSize: 12, color: 'var(--text)', paddingRight: 16, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.endpoint}</span>
-                <Badge status={r.status} />
-                <span className="mono" style={{ fontSize: 12, color: durationColor(r.duration) }}>{r.duration}ms</span>
-                <span style={{ fontSize: 12, color: 'var(--text-subtle)' }}>{r.timestamp}</span>
-              </div>
-            ))}
-          </div>
         </div>
-        <div style={{ textAlign: 'center', marginTop: 24 }}>
-          <button onClick={() => onNav('dashboard')} style={{
-            background: 'transparent', border: '1px solid var(--border2)',
-            color: 'var(--text-muted)', padding: '8px 20px', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all .15s',
-          }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--text-subtle)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border2)' }}>
-            Explore the demo dashboard →
-          </button>
+      </section>
+
+      {/* Testimonial */}
+      <section style={{ background: 'var(--canvas-subtle)', borderBottom: '1px solid var(--border-muted)' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+          <span style={{ fontSize: 48, fontWeight: 700, lineHeight: 1, color: 'var(--accent-emphasis)', display: 'block', marginBottom: 16 }}>"</span>
+          <blockquote style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.5rem)', fontWeight: 500, lineHeight: 1.5, margin: '0 0 24px' }}>
+            We spent an afternoon wiring it into our Express app. Now every API call that breaks has a stack trace, a curl command, and a replay button — before our users ever see it.
+          </blockquote>
+          <div style={{ fontSize: 14, color: 'var(--fg-default)', fontWeight: 500 }}>Sam Chen</div>
+          <div style={{ fontSize: 13, color: 'var(--fg-subtle)', marginTop: 2 }}>Staff Engineer, Acme</div>
         </div>
       </section>
 
       {/* CTA */}
-      <section style={{ borderTop: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '80px 40px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 36, fontWeight: 700, letterSpacing: '-0.8px', margin: '0 0 16px' }}>
+      <section>
+        <div style={{ maxWidth: 760, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 600, letterSpacing: '-0.02em', margin: '0 0 16px' }}>
             Start debugging in 30 seconds.
           </h2>
-          <p style={{ fontSize: 16, color: 'var(--text-muted)', margin: '0 0 40px' }}>
+          <p style={{ fontSize: 16, color: 'var(--fg-muted)', margin: '0 0 32px' }}>
             No account required. No credit card. Runs entirely on your machine.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <button onClick={() => onNav('dashboard')} style={{
-              background: 'var(--blue)', border: 'none', color: '#fff',
+              background: 'var(--accent-emphasis)', border: '1px solid rgba(255,255,255,0.08)', color: '#fff',
               padding: '10px 28px', borderRadius: 'var(--radius)',
-              cursor: 'pointer', fontSize: 14, fontWeight: 600, transition: 'background .15s',
+              cursor: 'pointer', fontSize: 14, fontWeight: 500, transition: 'background .15s',
             }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--blue-hover)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'var(--blue)')}>
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--accent-hover)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'var(--accent-emphasis)')}>
               Get Started
             </button>
             <a href="https://github.com" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'transparent', border: '1px solid var(--border2)', color: 'var(--text-muted)',
+              background: 'transparent', border: '1px solid var(--border-default)', color: 'var(--fg-muted)',
               padding: '10px 20px', borderRadius: 'var(--radius)',
               cursor: 'pointer', fontSize: 14, fontWeight: 500, textDecoration: 'none', transition: 'all .15s',
             }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--text-subtle)' }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border2)' }}>
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--fg-default)'; e.currentTarget.style.borderColor = 'var(--fg-subtle)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--fg-muted)'; e.currentTarget.style.borderColor = 'var(--border-default)' }}>
               <IconGithub /> View on GitHub
             </a>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid var(--border)', padding: '32px 40px' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 20, height: 20, borderRadius: 5, background: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>N</span>
-            </div>
-            <span style={{ fontWeight: 600, fontSize: 13 }}>NUMBAT</span>
-            <span style={{ color: 'var(--text-subtle)', fontSize: 13 }}>— local-first observability</span>
-          </div>
-          <div style={{ display: 'flex', gap: 24 }}>
+      {/* Dense footer */}
+      <footer style={{ borderTop: '1px solid var(--border-default)', background: 'var(--canvas-subtle)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 24px 32px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 32, marginBottom: 40 }}>
             {[
-              { label: 'GitHub', href: 'https://github.com' },
-              { label: 'Docs', href: '#' },
-              { label: 'Changelog', href: '#' },
-              { label: 'License', href: '#' },
-            ].map(l => (
-              <a key={l.label} href={l.href} style={{ color: 'var(--text-subtle)', fontSize: 13, textDecoration: 'none', transition: 'color .15s' }}
-                onClick={e => { if (l.href === '#') e.preventDefault() }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-subtle)')}>
-                {l.label}
-              </a>
+              { heading: 'Product', links: ['Request Inspector', 'Error Tracking', 'Replay', 'Sessions', 'cURL Export'] },
+              { heading: 'Resources', links: ['Documentation', 'Quickstart', 'CLI Reference', 'SDK', 'Changelog'] },
+              { heading: 'Community', links: ['GitHub', 'Discussions', 'Issues', 'Contributing', 'Security'] },
+              { heading: 'Company', links: ['About', 'Privacy', 'Terms', 'Contact', 'Status'] },
+            ].map(col => (
+              <div key={col.heading}>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--fg-default)', marginBottom: 12 }}>{col.heading}</div>
+                {col.links.map(l => (
+                  <a key={l} href="#" onClick={e => e.preventDefault()} style={{ display: 'block', fontSize: 13, color: 'var(--fg-muted)', textDecoration: 'none', marginBottom: 8, transition: 'color .15s' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--fg-default)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--fg-muted)')}>
+                    {l}
+                  </a>
+                ))}
+              </div>
             ))}
+          </div>
+          <div style={{ borderTop: '1px solid var(--border-muted)', paddingTop: 24, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 20, height: 20, borderRadius: 5, background: 'var(--accent-emphasis)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: '#fff' }}>N</span>
+              </div>
+              <span style={{ fontWeight: 600, fontSize: 13 }}>NUMBAT</span>
+            </div>
+            <span style={{ color: 'var(--fg-subtle)', fontSize: 13 }}>— local-first observability. Runs entirely on your machine.</span>
           </div>
         </div>
       </footer>
@@ -573,7 +664,7 @@ function MarketingPage({ onNav }: { onNav: (v: View) => void }) {
 
 // ─── Auth Page ────────────────────────────────────────────────────────────────
 
-function AuthPage({ mode, onNav }: { mode: 'login' | 'signup'; onNav: (v: View) => void }) {
+function AuthPage({ mode, onNav, theme, onToggleTheme }: { mode: 'login' | 'signup'; onNav: (v: View) => void; theme: Theme; onToggleTheme: () => void }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -598,16 +689,18 @@ function AuthPage({ mode, onNav }: { mode: 'login' | 'signup'; onNav: (v: View) 
       padding: '40px 16px',
     }}>
       {/* Back to marketing */}
-      <button onClick={() => onNav('marketing')} style={{
-        position: 'absolute', top: 24, left: 24,
-        background: 'transparent', border: '1px solid var(--border)',
-        color: 'var(--text-muted)', padding: '6px 14px', borderRadius: 'var(--radius)',
-        cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
-      }}
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}>
-        ← Back
-      </button>
+      <div style={{ position: 'absolute', top: 24, left: 24, right: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button onClick={() => onNav('marketing')} style={{
+          background: 'transparent', border: '1px solid var(--border)',
+          color: 'var(--text-muted)', padding: '6px 14px', borderRadius: 'var(--radius)',
+          cursor: 'pointer', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
+        }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}>
+          ← Back
+        </button>
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+      </div>
 
       <div style={{ width: '100%', maxWidth: 400 }}>
         {/* Logo */}
@@ -826,7 +919,14 @@ function Sidebar({ dashView, setDashView, onNav, errorCount, connected }: {
   )
 }
 
-function Topbar({ dashView, search, setSearch, connected }: { dashView: DashView; search: string; setSearch: (s: string) => void; connected: boolean | null }) {
+function Topbar({ dashView, search, setSearch, connected, theme, onToggleTheme }: {
+  dashView: DashView
+  search: string
+  setSearch: (s: string) => void
+  connected: boolean | null
+  theme: Theme
+  onToggleTheme: () => void
+}) {
   const titles: Record<DashView, string> = {
     requests: 'Request Log',
     errors: 'Errors',
@@ -868,6 +968,7 @@ function Topbar({ dashView, search, setSearch, connected }: { dashView: DashView
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: connected ? 'var(--green)' : connected === null ? 'var(--text-subtle)' : 'var(--amber)', flexShrink: 0 }}/>
         <span style={{ fontSize: 12, color: connected ? 'var(--text-muted)' : 'var(--amber)' }}>{connected ? 'Connected to localhost' : connected === null ? 'Connecting…' : 'Disconnected'}</span>
       </div>
+      <ThemeToggle theme={theme} onToggle={onToggleTheme} />
     </div>
   )
 }
@@ -1599,7 +1700,7 @@ function EmptyState() {
 
 // ─── Dashboard Shell ──────────────────────────────────────────────────────────
 
-function Dashboard({ onNav }: { onNav: (v: View) => void }) {
+function Dashboard({ onNav, theme, onToggleTheme }: { onNav: (v: View) => void; theme: Theme; onToggleTheme: () => void }) {
   const [dashView, setDashView] = useState<DashView>(() => {
     const saved = sessionStorage.getItem('numbat.dashview')
     return saved === 'requests' || saved === 'errors' || saved === 'empty' ? (saved as DashView) : 'requests'
@@ -1617,7 +1718,7 @@ function Dashboard({ onNav }: { onNav: (v: View) => void }) {
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--bg)' }}>
       <Sidebar dashView={dashView} setDashView={setDashView} onNav={onNav} errorCount={errorCount} connected={connected} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Topbar dashView={dashView} search={search} setSearch={setSearch} connected={connected} />
+        <Topbar dashView={dashView} search={search} setSearch={setSearch} connected={connected} theme={theme} onToggleTheme={onToggleTheme} />
         {dashView === 'requests' && <RequestsView search={search} setSearch={setSearch} />}
         {dashView === 'errors' && <ErrorsView onCountChange={setErrorCount} />}
         {dashView === 'empty' && <EmptyState />}
@@ -1727,6 +1828,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
 }
 
 export default function App() {
+  const [theme, toggleTheme] = useTheme()
+
   // Persist the current view so a full-page reload (dev-server restart, HMR
   // full-reload, preview harness refresh) returns you to where you were
   // instead of bouncing to the landing page.
@@ -1747,9 +1850,9 @@ export default function App() {
   }
 
   let page: ReactNode
-  if (view === 'marketing') page = <MarketingPage onNav={handleNav} />
-  else if (view === 'login' || view === 'signup') page = <AuthPage mode={authMode} onNav={handleNav} />
-  else if (view === 'dashboard') page = <Dashboard onNav={handleNav} />
+  if (view === 'marketing') page = <MarketingPage onNav={handleNav} theme={theme} onToggleTheme={toggleTheme} />
+  else if (view === 'login' || view === 'signup') page = <AuthPage mode={authMode} onNav={handleNav} theme={theme} onToggleTheme={toggleTheme} />
+  else if (view === 'dashboard') page = <Dashboard onNav={handleNav} theme={theme} onToggleTheme={toggleTheme} />
   else page = null
 
   useEffect(() => {
